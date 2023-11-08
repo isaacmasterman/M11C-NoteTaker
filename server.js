@@ -1,7 +1,7 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-const { v4: uuidv4 } = require('uuid');
+const generateUniqueId = require('./helpers/uuid');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -16,7 +16,7 @@ app.use(express.static('public'));
 // API Routes
 // GET route for /api/notes
 app.get('/api/notes', (req, res) => {
-    fs.readFile(path.join(__dirname, 'db/db.json'), 'utf8', (err, data) => {
+    fs.readFile(path.join(__dirname, '/db/db.json'), 'utf8', (err, data) => {
       if (err) throw err;
       res.json(JSON.parse(data));
     });
@@ -24,14 +24,14 @@ app.get('/api/notes', (req, res) => {
   
   // POST route for /api/notes
   app.post('/api/notes', (req, res) => {
-    const newNote = { ...req.body, id: uuidv4() };
+    const newNote = { ...req.body, id: generateUniqueId() };
   
-    fs.readFile(path.join(__dirname, 'db/db.json'), 'utf8', (err, data) => {
+    fs.readFile(path.join(__dirname, '/db/db.json'), 'utf8', (err, data) => {
       if (err) throw err;
       const notes = JSON.parse(data);
       notes.push(newNote);
   
-      fs.writeFile(path.join(__dirname, 'db/db.json'), JSON.stringify(notes), (err) => {
+      fs.writeFile(path.join(__dirname, '/db/db.json'), JSON.stringify(notes, null, 2), (err) => {
         if (err) throw err;
         res.json(newNote);
       });
@@ -42,14 +42,14 @@ app.get('/api/notes', (req, res) => {
   app.delete('/api/notes/:id', (req, res) => {
     const noteId = req.params.id;
   
-    fs.readFile(path.join(__dirname, 'db/db.json'), 'utf8', (err, data) => {
+    fs.readFile(path.join(__dirname, '/db/db.json'), 'utf8', (err, data) => {
       if (err) throw err;
       let notes = JSON.parse(data);
-      notes = notes.filter(note => note.id !== noteId);
+      notes = notes.filter((note) => note.id !== noteId);
   
-      fs.writeFile(path.join(__dirname, 'db/db.json'), JSON.stringify(notes), (err) => {
+      fs.writeFile(path.join(__dirname, '/db/db.json'), JSON.stringify(notes, null, 2), (err) => {
         if (err) throw err;
-        res.json({ msg: 'Note deleted' });
+        res.json({ msg: `Note with id ${noteId} has been deleted.` });
       });
     });
   });
